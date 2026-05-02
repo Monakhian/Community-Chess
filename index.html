@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<h1>Community Chess</h1>
+  <style>
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      width: 480px;
+    }
+
+    .square {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      cursor: pointer;
+    }
+
+    .light { background-color: #f0d9b5; }
+    .dark  { background-color: #b58863; }
+
+    .selected {
+    	box-shadow: inset 0 0 0 4px rgba(255, 0, 0, 0.7);
+	}
+  </style>
+</head>
+<body>
+
+<div class="board" id="board"></div>
+
+<script>
+  const board = document.getElementById("board");
+
+  let selectedSquare = null;
+
+  // Create board
+  for (let rank = 0; rank < 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+
+      const square = document.createElement("div");
+      square.classList.add("square");
+
+      // Color pattern
+      if ((file + rank) % 2 === 0) {
+        square.classList.add("light");
+      } else {
+        square.classList.add("dark");
+      }
+
+      // Store coordinates
+      square.dataset.rank = 7 - rank;
+      square.dataset.file = file;
+
+      square.addEventListener("click", () => handleClick(square));
+
+	fetch("/board")
+	  .then(res => res.json())
+	  .then(data => {
+	   	renderBoard(data.board);
+	  });
+
+      board.appendChild(square);
+	    }
+  }
+
+const pieceMap = {
+  'P': '♙', 'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔',
+  'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚'
+};
+
+function renderBoard(boardState) {
+  const squares = document.querySelectorAll(".square");
+
+  squares.forEach(square => {
+    const rank = square.dataset.rank;
+    const file = square.dataset.file;
+
+    const piece = boardState[file][rank];
+    square.textContent = pieceMap[piece] || "";
+  });
+};
+
+  function handleClick(square) {
+    const rank = square.dataset.rank;
+    const file = square.dataset.file;
+
+    if (!selectedSquare) {
+      // First click
+      selectedSquare = square;
+      square.classList.add("selected");
+    } else {
+      // Second click
+      const from = {
+        file: selectedSquare.dataset.file,
+        rank: selectedSquare.dataset.rank
+      };
+
+      const to = { file, rank };
+
+      // Remove highlight
+      selectedSquare.classList.remove("selected");
+      selectedSquare = null;
+
+      sendMove(from, to);
+    }
+  }
+
+  function sendMove(from, to) {
+    console.log("Move:", from, "->", to);
+
+    fetch("/move", {
+  	method: "POST",
+  	headers: {
+    	"Content-Type": "text/plain"
+  	},
+  	body: from.file + from.rank + to.file + to.rank
+	})
+    .then(res => res.json())
+    .then(data => {
+      console.log("Server response:", data);
+      if (data.board) {
+      	renderBoard(data.board);
+    	}
+    })
+    .catch(err => console.error(err));
+  }
+</script>
+
+</body>
+</html>
