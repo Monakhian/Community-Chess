@@ -65,12 +65,12 @@ public:
 		return colors[color] + " " + types[type];
 	}
 	
-	std::string to_char() const {
+	char to_char() const {
 		if (color == WHITE) {
-			std::string chars[] = { "P", "N", "B", "R", "Q", "K" };
+			char chars[] = { 'P', 'N', 'B', 'R', 'Q', 'K' };
 			return chars[type];
 		} else if (color == BLACK) {
-			std::string chars[] = { "p", "n", "b", "r", "q", "k" };
+			char chars[] = { 'p', 'n', 'b', 'r', 'q', 'k' };
 			return chars[type];
 		} else {
 			throw std::invalid_argument("Can't convert piece to char: Piece is somehow neither white nor black");
