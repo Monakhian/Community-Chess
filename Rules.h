@@ -20,26 +20,34 @@ public:
 };
 
 class Move {
+	// Functions below mimic having mutable member functions
+	// Allows for rules to modify the behavior of moves without needing to create new move types for every rule change
+	// Example 1: Mutating apply allows for pawn promotion
+	// Example 2: Mutating string_rep allows for castling to be denoted as O-O and O-O-O instead of Kg1 and Kc1
+	// Further, this allows for custom rules such as swap chess and duck chess to define their own notation
+	std::function<void(const Move&, ChessBoard&)> apply = [](const Move& move, ChessBoard& board) {  board.move_piece(move.fromFile, move.fromRank, move.toFile, move.toRank); };
+	std::function<std::string(const Move&, const ChessBoard&)> string_rep = [](const Move& move, const ChessBoard& board) {
+		std::stringstream ss;
+		// FIXME: Adjust logic to match standard chess notation
+		ss << std::toupper(board.at(move.fromFile, move.fromRank).to_char()) << char('a' + move.fromFile) << (move.fromRank + 1) << char('a' + move.toFile) << (move.toRank + 1);
+		return ss.str();
+	};
+
+public:
 	const int fromFile;
 	const int fromRank;
 	const int toFile;
 	const int toRank;
-	std::function<void(Move&, ChessBoard&)> apply = [](Move& move, ChessBoard& board) {  board.move_piece(move.fromFile, move.fromRank, move.toFile, move.toRank); };
 
-public:
 	Move(int fromFile, int fromRank, int toFile, int toRank) : fromFile(fromFile), fromRank(fromRank), toFile(toFile), toRank(toRank) {}
 	
-	void execute(ChessBoard& board) { apply(*this, board); }
+	void execute(ChessBoard& board) const { apply(*this, board); }
 
-	void overwrite_apply(std::function<void(Move&, ChessBoard&)> newApply) { apply = newApply; }
+	void overwrite_apply(std::function<void(const Move&, ChessBoard&)> newApply) { apply = newApply; }
 
-	std::string to_string(const ChessBoard& board) const {
-		std::stringstream ss;
-		// FIXME: Adjust logic to match standard chess notation
-		// This will be tricky once nonstandard rules are added due to the need for custom notation
-		ss << std::toupper(board.at(fromFile, fromRank).to_char()) << " from " << char('a' + fromFile) << (fromRank + 1) << char('a' + toFile) << (toRank + 1);
-		return ss.str();
-	}
+	std::string to_string(const ChessBoard& board) const { return string_rep(*this, board); }
+
+	void overwrite_string_rep(std::function<std::string(const Move&, const ChessBoard&)> newStringRep) { string_rep = newStringRep; }
 	
 };
 
