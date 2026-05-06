@@ -56,10 +56,7 @@ int main() {
 #include <vector>
 
 int main () {
-	std::vector<Rule*> testRules2;
-	RuleSet testRuleSet2(testRules2);
-
-	std::cout << RuleSet::get_rule_sets().size() << std::endl;
+	std::cout << RuleSet::get_rule_sets().at(0)->get_rules().size() << std::endl;
 	
 	return 0;
 }

@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <stdexcept>
 
 #include <iostream>
 
@@ -20,7 +21,6 @@ class RuleSet {
 public:
     RuleSet(std::vector<Rule*> rules) : rules(rules) {
     	get_rule_sets().push_back(this);
-    	std::cout << "Constructing instance " << get_rule_sets().size() << std::endl;
     }
 
 	~RuleSet() {
@@ -72,40 +72,59 @@ public:
 	
 };
 
+class MoveGrid {
+	std::vector<Move> grid[8][8];
+public:
+	std::vector<Move>& at(int file, int rank) {
+		if (file < 0 || file > 7 || rank < 0 || rank > 7) {
+			throw std::out_of_range("Invalid MoveGrid coordinates");
+		}
+		return grid[file][rank];
+	}
+
+	void clear() {
+		for (int file = 0; file < 8; file++) {
+			for (int rank = 0; rank < 8; rank++) {
+				grid[file][rank].clear();
+			}
+		}
+	}
+};
+
 
 
 class MoveGenerator : public Rule {
-	std::function<std::vector<Move>(ChessBoard&, int, int)> generate;
+	std::function<void(ChessBoard&, MoveGrid&, int, int)> generate;
 	
 public:
-	MoveGenerator(std::function<std::vector<Move>(ChessBoard&, int, int)> generate) : generate(generate) {}
+	MoveGenerator(std::function<void(ChessBoard&, MoveGrid&, int, int)> generate) : generate(generate) {}
 	
-	std::vector<Move> get_moves(ChessBoard& board, int file, int rank) {
-		return generate(board, file, rank);
+	void get_moves(ChessBoard& board, MoveGrid& moveGrid, int file, int rank) {
+		generate(board, moveGrid, file, rank);
 	}
 };
 
 
 
 class MoveTransformer : public Rule {
-	std::function<void(ChessBoard& board, std::vector<Move>&)> transform;
+	std::function<void(ChessBoard& board, MoveGrid&)> transform;
 	
 public:
-	MoveTransformer(std::function<void(ChessBoard& board, std::vector<Move>&)> transform) : transform(transform) {}
+	MoveTransformer(std::function<void(ChessBoard& board, MoveGrid&)> transform) : transform(transform) {}
 	
-	void apply(ChessBoard& board, std::vector<Move>& moves) {
-		transform(board, moves);
+	void apply(ChessBoard& board, MoveGrid& moveGrid) {
+		transform(board, moveGrid);
 	}
 };
 
 
 
 class MoveRestrictor : public Rule {
-	std::function<void(ChessBoard& board, std::vector<Move>&)> restrict;
+	std::function<void(ChessBoard& board, MoveGrid&)> restrict;
 public:
-	MoveRestrictor(std::function<void(ChessBoard& board, std::vector<Move>&)> restrict) : restrict(restrict) {}
+	MoveRestrictor(std::function<void(ChessBoard& board, MoveGrid&)> restrict) : restrict(restrict) {}
 	
-	void apply(ChessBoard& board, std::vector<Move>& moves) {
+	void apply(ChessBoard& board, MoveGrid& moves) {
 		restrict(board, moves);
 	}
 };
