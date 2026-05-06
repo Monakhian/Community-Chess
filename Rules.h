@@ -1,3 +1,6 @@
+#ifndef RULES_H
+#define RULES_H
+
 #include "GamePieces.h"
 
 #include <functional>
@@ -7,19 +10,17 @@
 #include <string>
 #include <algorithm>
 
-#ifndef RULES_H
-#define RULES_H
+#include <iostream>
 
 class Rule {};
 
 class RuleSet {
-    static std::vector<RuleSet> ruleSets;
-    
     std::vector<Rule*> rules;
 
 public:
     RuleSet(std::vector<Rule*> rules) : rules(rules) {
-    	ruleSets.push_back(this);
+    	get_rule_sets().push_back(this);
+    	std::cout << "Constructing instance " << get_rule_sets().size() << std::endl;
     }
 
 	~RuleSet() {
@@ -27,9 +28,16 @@ public:
 			delete rules.at(i);
 		}
 	}
+	
+	static std::vector<RuleSet*>& get_rule_sets() {
+		static std::vector<RuleSet*> ruleSets;
+		return ruleSets;
+		}
 
     const std::vector<Rule*> get_rules() const { return rules; }
 };
+
+
 
 class Move {
 	// Functions below mimic having mutable member functions
@@ -64,6 +72,8 @@ public:
 	
 };
 
+
+
 class MoveGenerator : public Rule {
 	std::function<std::vector<Move>(int, int)> generate;
 	
@@ -74,6 +84,8 @@ public:
 		return generate(file, rank);
 	}
 };
+
+
 
 class MoveTransformer : public Rule {
 	std::function<void(std::vector<Move>&)> transform;
@@ -86,9 +98,10 @@ public:
 	}
 };
 
+
+
 class MoveRestrictor : public Rule {
 	std::function<void(std::vector<Move>&)> restrict;
-	
 public:
 	MoveRestrictor(std::function<void(std::vector<Move>&)> restrict) : restrict(restrict) {}
 	
@@ -98,6 +111,8 @@ public:
 };
 
 #endif
+
+
 
 // Code to be executed when building as an executable for testing purposes
 // only works with gcc/clang compilers

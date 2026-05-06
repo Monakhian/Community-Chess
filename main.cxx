@@ -3,13 +3,14 @@
 // #include <ifaddrs.h>
 
 // Actual packages needed
-#include "httplib.h"
+// #include "httplib.h" // Uncomment when done testing
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 #include "GamePieces.h"
-
+#include "Rules.h"
+/*
 int main() {
     httplib::Server svr;
     ChessBoard board;
@@ -46,3 +47,20 @@ int main() {
     std::cout << "Server running on http://localhost:8080\n";
     svr.listen("0.0.0.0", 8080);
 }
+*/
+
+
+
+// Separate main function for testing purposes
+// /*
+#include <vector>
+
+int main () {
+	std::vector<Rule*> testRules2;
+	RuleSet testRuleSet2(testRules2);
+
+	std::cout << RuleSet::get_rule_sets().size() << std::endl;
+	
+	return 0;
+}
+// */
