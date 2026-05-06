@@ -115,6 +115,11 @@ public:
 		board[file][rank] = ChessPiece(name);
 	}
 	
+	bool has_piece(int file, int rank) const {
+		if (file < 0 || file > 7 || rank < 0 || rank > 7) { throw std::out_of_range("Invalid board coordinates"); }
+		return board[file][rank].has_value();
+	}
+
 	ChessPiece at(int file, int rank) const {
 		if (file < 0 || file > 7 || rank < 0 || rank > 7) { throw std::out_of_range("Invalid board coordinates"); }
 		return board[file][rank].value();

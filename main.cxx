@@ -37,7 +37,7 @@ int main() {
 	});
 
     svr.Post("/move", [&](const httplib::Request& req, httplib::Response& res) {
-        if (req.body[0] != req.body [2] || req.body[1] != req.body[3]) {
+        if (board.has_piece(req.body[0] - '0', req.body[1] - '0') && (req.body[0] != req.body[2] || req.body[1] != req.body[3])) {
         	board.move_piece(req.body[0] - '0', req.body[1] - '0', req.body[2] - '0', req.body[3] - '0');
         }
 

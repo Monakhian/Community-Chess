@@ -75,38 +75,38 @@ public:
 
 
 class MoveGenerator : public Rule {
-	std::function<std::vector<Move>(int, int)> generate;
+	std::function<std::vector<Move>(ChessBoard&, int, int)> generate;
 	
 public:
-	MoveGenerator(std::function<std::vector<Move>(int, int)> generate) : generate(generate) {}
+	MoveGenerator(std::function<std::vector<Move>(ChessBoard&, int, int)> generate) : generate(generate) {}
 	
-	std::vector<Move> get_moves(int file, int rank) {
-		return generate(file, rank);
+	std::vector<Move> get_moves(ChessBoard& board, int file, int rank) {
+		return generate(board, file, rank);
 	}
 };
 
 
 
 class MoveTransformer : public Rule {
-	std::function<void(std::vector<Move>&)> transform;
+	std::function<void(ChessBoard& board, std::vector<Move>&)> transform;
 	
 public:
-	MoveTransformer(std::function<void(std::vector<Move>&)> transform) : transform(transform) {}
+	MoveTransformer(std::function<void(ChessBoard& board, std::vector<Move>&)> transform) : transform(transform) {}
 	
-	void apply(std::vector<Move>& moves) {
-		transform(moves);
+	void apply(ChessBoard& board, std::vector<Move>& moves) {
+		transform(board, moves);
 	}
 };
 
 
 
 class MoveRestrictor : public Rule {
-	std::function<void(std::vector<Move>&)> restrict;
+	std::function<void(ChessBoard& board, std::vector<Move>&)> restrict;
 public:
-	MoveRestrictor(std::function<void(std::vector<Move>&)> restrict) : restrict(restrict) {}
+	MoveRestrictor(std::function<void(ChessBoard& board, std::vector<Move>&)> restrict) : restrict(restrict) {}
 	
-	void apply(std::vector<Move>& moves) {
-		restrict(moves);
+	void apply(ChessBoard& board, std::vector<Move>& moves) {
+		restrict(board, moves);
 	}
 };
 
