@@ -10,13 +10,25 @@
 #ifndef RULES_H
 #define RULES_H
 
-class Rule {
-	static std::vector<Rule*> rules;
-	
+class Rule {};
+
+class RuleSet {
+    static std::vector<RuleSet> ruleSets;
+    
+    std::vector<Rule*> rules;
+
 public:
-	Rule() {
-		rules.push_back(this);
+    RuleSet(std::vector<Rule*> rules) : rules(rules) {
+    	ruleSets.push_back(this);
+    }
+
+	~RuleSet() {
+		for (int i = 0; i < rules.size(); i++) {
+			delete rules.at(i);
+		}
 	}
+
+    const std::vector<Rule*> get_rules() const { return rules; }
 };
 
 class Move {
@@ -26,6 +38,7 @@ class Move {
 	// Example 2: Mutating "string_rep" allows for castling to be denoted as O-O and O-O-O instead of Kg1 and Kc1
 	// Further, this allows for custom rules such as swap chess and duck chess to define their own notation
 	std::function<void(const Move&, ChessBoard&)> apply = [](const Move& move, ChessBoard& board) {  board.move_piece(move.fromFile, move.fromRank, move.toFile, move.toRank); };
+	
 	std::function<std::string(const Move&, const ChessBoard&)> string_rep = [](const Move& move, const ChessBoard& board) {
 		std::stringstream ss;
 		// FIXME: Adjust logic to match standard chess notation
@@ -52,18 +65,36 @@ public:
 };
 
 class MoveGenerator : public Rule {
+	std::function<std::vector<Move>(int, int)> generate;
+	
 public:
-	virtual std::vector<Move> get_moves(int file, int rank) = 0;
+	MoveGenerator(std::function<std::vector<Move>(int, int)> generate) : generate(generate) {}
+	
+	std::vector<Move> get_moves(int file, int rank) {
+		return generate(file, rank);
+	}
 };
 
 class MoveTransformer : public Rule {
+	std::function<void(std::vector<Move>&)> transform;
+	
 public:
-	virtual void apply(std::vector<Move>& moves) = 0;
+	MoveTransformer(std::function<void(std::vector<Move>&)> transform) : transform(transform) {}
+	
+	void apply(std::vector<Move>& moves) {
+		transform(moves);
+	}
 };
 
 class MoveRestrictor : public Rule {
+	std::function<void(std::vector<Move>&)> restrict;
+	
 public:
-	virtual void apply(std::vector<Move>& moves) = 0;
+	MoveRestrictor(std::function<void(std::vector<Move>&)> restrict) : restrict(restrict) {}
+	
+	void apply(std::vector<Move>& moves) {
+		restrict(moves);
+	}
 };
 
 #endif
