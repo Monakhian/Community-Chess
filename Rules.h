@@ -15,7 +15,7 @@
 
 class Rule {};
 
-class RuleSet {
+class RuleSet { // FIXME (maybe): use dynamic_cast to sort rules upon construction
     std::vector<Rule*> rules;
 
 public:
@@ -100,6 +100,18 @@ public:
 	MoveGenerator(std::function<void(ChessBoard&, MoveGrid&, int, int)> generate) : generate(generate) {}
 	
 	void get_moves(ChessBoard& board, MoveGrid& moveGrid, int file, int rank) {
+		generate(board, moveGrid, file, rank);
+	}
+};
+
+
+class AttackGenerator : public Rule {
+	std::function<void(ChessBoard&, MoveGrid&, int, int)> generate;
+
+public:
+	AttackGenerator(std::function<void(ChessBoard&, MoveGrid&, int, int)> generate) : generate(generate) {}
+
+	void get_attacks(ChessBoard& board, MoveGrid& moveGrid, int file, int rank) {
 		generate(board, moveGrid, file, rank);
 	}
 };

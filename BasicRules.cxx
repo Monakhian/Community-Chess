@@ -17,7 +17,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Pawn capture
+    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Pawn capture
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == PAWN) {
             Color color = board.at(file, rank).get_color();
             int direction = (color == WHITE) ? 1 : -1;
@@ -41,7 +41,24 @@ RuleSet testRuleSet(std::vector<Rule*>{
                 int newFile = file + df;
                 int newRank = rank + dr;
                 if (newFile >= 0 && newFile < 8 && newRank >= 0 && newRank < 8) {
-                    if (!board.has_piece(newFile, newRank) || board.at(newFile, newRank).get_color() != board.at(file, rank).get_color()) {
+                    if (!board.has_piece(newFile, newRank)) {
+                        moveGrid.at(newFile, newRank).emplace_back(Move{file, rank, newFile, newRank});
+                    }
+                }
+            }
+        }
+    }),
+    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Knight attack
+        if (board.has_piece(file, rank) && board.at(file, rank).get_type() == KNIGHT) {
+            std::vector<std::pair<int, int>> knightMoves = {
+                {1, 2}, {2, 1}, {2, -1}, {1, -2},
+                {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}
+            };
+            for (const auto& [df, dr] : knightMoves) {
+                int newFile = file + df;
+                int newRank = rank + dr;
+                if (newFile >= 0 && newFile < 8 && newRank >= 0 && newRank < 8) {
+                    if (board.has_piece(newFile, newRank) && board.at(newFile, newRank).get_color() != board.at(file, rank).get_color()) {
                         moveGrid.at(newFile, newRank).emplace_back(Move{file, rank, newFile, newRank});
                     }
                 }
@@ -60,6 +77,24 @@ RuleSet testRuleSet(std::vector<Rule*>{
                     if (!board.has_piece(newFile, newRank)) {
                         moveGrid.at(newFile, newRank).emplace_back(Move{file, rank, newFile, newRank});
                     } else {
+                        break;
+                    }
+                    newFile += df;
+                    newRank += dr;
+                }
+            }
+        }
+    }),
+    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Bishop attack
+        if (board.has_piece(file, rank) && board.at(file, rank).get_type() == BISHOP) {
+            std::vector<std::pair<int, int>> directions = {
+                {1, 1}, {1, -1}, {-1, -1}, {-1, 1}
+            };
+            for (const auto& [df, dr] : directions) {
+                int newFile = file + df;
+                int newRank = rank + dr;
+                while (newFile >= 0 && newFile < 8 && newRank >= 0 && newRank < 8) {
+                    if (board.has_piece(newFile, newRank)) {
                         if (board.at(newFile, newRank).get_color() != board.at(file, rank).get_color()) {
                             moveGrid.at(newFile, newRank).emplace_back(Move{file, rank, newFile, newRank});
                         }
