@@ -2,9 +2,10 @@
 #include "Rules.h"
 
 #include <vector>
+#include <memory>
 
-RuleSet testRuleSet(std::vector<Rule*>{
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Pawn move
+RuleSet basicRules (std::vector<std::shared_ptr<Rule>>{
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Pawn move
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == PAWN) {
             if (board.at(file, rank).get_color() == WHITE && rank < 7) {
                 if (!board.has_piece(file, rank + 1)) {
@@ -17,7 +18,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Pawn capture
+    std::make_shared<AttackGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Pawn capture
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == PAWN) {
             Color color = board.at(file, rank).get_color();
             int direction = (color == WHITE) ? 1 : -1;
@@ -31,7 +32,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Knight move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Knight move
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == KNIGHT) {
             std::vector<std::pair<int, int>> knightMoves = {
                 {1, 2}, {2, 1}, {2, -1}, {1, -2},
@@ -48,7 +49,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Knight attack
+    std::make_shared<AttackGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Knight attack
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == KNIGHT) {
             std::vector<std::pair<int, int>> knightMoves = {
                 {1, 2}, {2, 1}, {2, -1}, {1, -2},
@@ -65,7 +66,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Bishop move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Bishop move
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == BISHOP) {
             std::vector<std::pair<int, int>> directions = {
                 {1, 1}, {1, -1}, {-1, -1}, {-1, 1}
@@ -85,7 +86,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Bishop attack
+    std::make_shared<AttackGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Bishop attack
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == BISHOP) {
             std::vector<std::pair<int, int>> directions = {
                 {1, 1}, {1, -1}, {-1, -1}, {-1, 1}
@@ -106,7 +107,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Rook move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Rook move
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == ROOK) {
             std::vector<std::pair<int, int>> directions = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1}
@@ -126,7 +127,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Rook attack
+    std::make_shared<AttackGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Rook attack
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == ROOK) {
             std::vector<std::pair<int, int>> directions = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1}
@@ -147,7 +148,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Queen move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Queen move
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == QUEEN) {
             std::vector<std::pair<int, int>> directions = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
@@ -168,7 +169,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Queen attack
+    std::make_shared<AttackGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Queen attack
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == QUEEN) {
             std::vector<std::pair<int, int>> directions = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
@@ -190,7 +191,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // King move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // King move
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == KING) {
             std::vector<std::pair<int, int>> kingMoves = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
@@ -207,7 +208,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new AttackGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // King attack
+    std::make_shared<AttackGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // King attack
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == KING) {
             std::vector<std::pair<int, int>> kingMoves = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
@@ -224,7 +225,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveTransformer([](ChessBoard& board, MoveGrid& moveGrid) { // Pawn promotion
+    std::make_shared<MoveTransformer>([](ChessBoard& board, MoveGrid& moveGrid) { // Pawn promotion
         for (int file = 0; file < 8; file++) {
             for (int rank = 0; rank < 8; rank++) {
                 for (auto& move : moveGrid.at(file, rank)) {
@@ -248,7 +249,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Castling move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // Castling move
         // FIXME: Add logic to detect when king/rooks have moved and to check for check conditions that would prevent castling
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == KING) {
             Color color = board.at(file, rank).get_color();
@@ -283,7 +284,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveGenerator([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // En passant move
+    std::make_shared<MoveGenerator>([](ChessBoard& board, MoveGrid& moveGrid, int file, int rank) { // En passant move
         // FIME: Add logic to only allow en passant on the turn immediately following the opponent's pawn moving two squares forward from its starting position
         if (board.has_piece(file, rank) && board.at(file, rank).get_type() == PAWN) {
             Color color = board.at(file, rank).get_color();
@@ -308,7 +309,7 @@ RuleSet testRuleSet(std::vector<Rule*>{
             }
         }
     }),
-    new MoveRestrictor([](ChessBoard& board, MoveGrid& moveGrid) { // Can't make moves that would put your own king in check
+    std::make_shared<MoveRestrictor>([](ChessBoard& board, MoveGrid& moveGrid) { // Can't make moves that would put your own king in check
         for (int file = 0; file < 8; file++) {
             for (int rank = 0; rank < 8; rank++) {
                 auto& moves = moveGrid.at(file, rank);

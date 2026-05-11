@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <vector>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <string>
@@ -15,26 +16,24 @@
 
 class Rule {};
 
-class RuleSet { // FIXME (maybe): use dynamic_cast to sort rules upon construction
-    std::vector<Rule*> rules;
+class RuleSet {
+    std::vector<std::shared_ptr<Rule>> rules;
 
 public:
-    RuleSet(std::vector<Rule*> rules) : rules(rules) {
-    	get_rule_sets().push_back(this);
+    RuleSet(std::vector<std::shared_ptr<Rule>> rules) : rules(rules) {
+    	get_rule_sets().push_back(std::unique_ptr<RuleSet>(this));
     }
-
-	~RuleSet() {
-		for (int i = 0; i < rules.size(); i++) {
-			delete rules.at(i);
-		}
-	}
 	
-	static std::vector<RuleSet*>& get_rule_sets() {
-		static std::vector<RuleSet*> ruleSets;
+	static std::vector<std::unique_ptr<RuleSet>>& get_rule_sets() {
+		static std::vector<std::unique_ptr<RuleSet>> ruleSets;
 		return ruleSets;
-		}
+	}
 
-    const std::vector<Rule*> get_rules() const { return rules; }
+	static void create_rule_set(std::vector<std::shared_ptr<Rule>> rules) {
+		get_rule_sets().push_back(std::unique_ptr<RuleSet>(new RuleSet(rules)));
+	}
+
+    const std::vector<std::shared_ptr<Rule>>& get_rules() const { return rules; }
 };
 
 
